@@ -1,14 +1,22 @@
 import * as THREE from "three";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/all";
 
 export function setCharTimeline(
   character: THREE.Object3D<THREE.Object3DEventMap> | null,
-  camera: THREE.PerspectiveCamera
+  camera: THREE.PerspectiveCamera,
+  whiteboard?: THREE.Object3D<THREE.Object3DEventMap> | null
 ) {
-  let intensity: number = 0;
-  setInterval(() => {
-    intensity = Math.random();
-  }, 200);
+  const whatBox = document.querySelector(".what-box-in");
+  const whiteboardPose = whiteboard?.userData.presentationPose as
+    | {
+        x: number;
+        y: number;
+        z: number;
+        scale: number;
+        rotationY: number;
+      }
+    | undefined;
   const tl1 = gsap.timeline({
     scrollTrigger: {
       trigger: ".landing-section",
@@ -38,9 +46,38 @@ export function setCharTimeline(
   });
 
   let neckBone = character?.getObjectByName("spine005") || character?.getObjectByName("Head") || character?.getObjectByName("Neck");
-
   if (window.innerWidth > 1024) {
     if (character) {
+      if (whiteboard) {
+        ScrollTrigger.create({
+          trigger: ".whatIDO",
+          start: "top 55%",
+          end: "bottom top",
+          invalidateOnRefresh: true,
+          onEnter: () => {
+            whiteboard.visible = true;
+          },
+          onEnterBack: () => {
+            whiteboard.visible = true;
+          },
+          onLeave: () => {
+            whiteboard.visible = false;
+          },
+          onLeaveBack: () => {
+            whiteboard.visible = false;
+          },
+        });
+      }
+      if (whiteboard && whiteboardPose) {
+        whiteboard.visible = false;
+        whiteboard.position.set(
+          whiteboardPose.x + 0.75,
+          whiteboardPose.y - 1.4,
+          whiteboardPose.z + 1.2
+        );
+        whiteboard.scale.setScalar(whiteboardPose.scale * 0.88);
+        whiteboard.rotation.y = whiteboardPose.rotationY - 0.18;
+      }
       tl1
         .fromTo(character.rotation, { y: 0 }, { y: 0.7, duration: 1 }, 0)
         .to(camera.position, { z: 22 }, 0)
@@ -70,38 +107,86 @@ export function setCharTimeline(
 
       tl2
         .fromTo(
-          ".what-box-in",
-          { display: "none" },
-          { display: "flex", duration: 0.1, delay: 6 },
-          0
-        )
-        .fromTo(
           ".character-rim",
           { opacity: 1, scaleX: 1.4 },
           { opacity: 0, scale: 0, y: "-70%", duration: 5, delay: 2 },
           0.3
         );
+      if (whatBox) {
+        tl2.fromTo(
+          ".what-box-in",
+          { display: "none" },
+          { display: "flex", duration: 0.1, delay: 6 },
+          0
+        );
+      }
 
       tl3
         .fromTo(
           ".character-model",
           { y: "0%" },
-          { y: "-100%", duration: 4, ease: "none", delay: 1 },
+          { y: "-100%", duration: 4, ease: "none" },
           0
         )
         .fromTo(".whatIDO", { y: 0 }, { y: "15%", duration: 2 }, 0)
-        .to(character.rotation, { x: -0.04, duration: 2, delay: 1 }, 0);
+        .to(character.rotation, { x: -0.04, duration: 2 }, 0);
+      if (whiteboard && whiteboardPose) {
+        tl3
+          .to(
+            whiteboard.position,
+            {
+              x: whiteboardPose.x,
+              y: whiteboardPose.y,
+              z: whiteboardPose.z,
+              duration: 1.2,
+              ease: "power3.out",
+            },
+            0
+          )
+          .to(
+            whiteboard.scale,
+            {
+              x: whiteboardPose.scale,
+              y: whiteboardPose.scale,
+              z: whiteboardPose.scale,
+              duration: 1,
+              ease: "power2.out",
+            },
+            0
+          )
+          .to(
+            whiteboard.rotation,
+            {
+              y: whiteboardPose.rotationY,
+              duration: 1,
+              ease: "power2.out",
+            },
+            0
+          );
+      }
     }
   } else {
     if (character) {
-      const tM2 = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".what-box-in",
-          start: "top 70%",
-          end: "bottom top",
-        },
-      });
-      tM2.to(".what-box-in", { display: "flex", duration: 0.1, delay: 0 }, 0);
+      if (whiteboard && whiteboardPose) {
+        whiteboard.visible = false;
+        whiteboard.position.set(
+          whiteboardPose.x,
+          whiteboardPose.y,
+          whiteboardPose.z
+        );
+        whiteboard.scale.setScalar(whiteboardPose.scale);
+        whiteboard.rotation.y = whiteboardPose.rotationY;
+      }
+      if (whatBox) {
+        const tM2 = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".what-box-in",
+            start: "top 70%",
+            end: "bottom top",
+          },
+        });
+        tM2.to(".what-box-in", { display: "flex", duration: 0.1, delay: 0 }, 0);
+      }
     }
   }
 }

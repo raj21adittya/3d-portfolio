@@ -1,7 +1,7 @@
 .whatIDO {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   place-items: center;
   position: relative;
   opacity: 1;
@@ -10,6 +10,13 @@
   max-width: 1920px;
   margin: auto;
   z-index: 9;
+}
+.what-box-title {
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: 0;
+  box-sizing: border-box;
+  transform: translateX(-36px);
 }
 .what-box {
   width: 50%;
@@ -22,8 +29,9 @@
   font-size: calc(4vw + 25px);
   line-height: calc(4vw + 20px);
   font-weight: 600;
-  margin-right: 10%;
+  margin-right: 0;
   margin-bottom: 100px;
+  text-align: left;
 }
 
 .hat-h2 {
@@ -49,6 +57,14 @@
   padding: 50px;
   box-sizing: border-box;
 }
+.what-box-in-single {
+  height: 320px;
+}
+
+.what-content-single {
+  height: 100%;
+  min-height: 100%;
+}
 
 .what-noTouch:hover,
 .what-content-active {
@@ -61,6 +77,10 @@
 .what-content.what-sibling {
   min-height: 33%;
   padding: 10px 50px;
+}
+.what-content-single:hover,
+.what-content-single.what-content-active {
+  min-height: 100%;
 }
 .what-content h3 {
   font-size: 35px;
@@ -251,6 +271,9 @@
   .what-box-in {
     height: 400px;
   }
+  .what-box-in-single {
+    height: 320px;
+  }
   .what-content h3 {
     font-size: 28px;
   }
@@ -293,6 +316,9 @@
     height: 500px;
     margin-left: -50px;
   }
+  .what-box-in-single {
+    height: 320px;
+  }
   .what-content {
     padding: 50px;
     width: 500px;
@@ -316,6 +342,14 @@
 @media only screen and (max-width: 900px) {
   .whatIDO {
     flex-direction: column;
+    justify-content: center;
+  }
+  .what-box-title {
+    width: 500px;
+    max-width: calc(100% - 50px);
+    padding-left: 0;
+    justify-content: left;
+    transform: none;
   }
   .what-box h2 {
     margin: 50px 0;
@@ -328,6 +362,9 @@
   .what-box:last-child {
     height: 500px;
   }
+  .what-box-content {
+    height: 320px;
+  }
   .what-box {
     width: 500px;
     max-width: calc(100% - 50px);
@@ -339,6 +376,9 @@
   .what-box-in {
     margin-left: 0px;
     height: 450px;
+  }
+  .what-box-in-single {
+    height: 320px;
   }
   .what-content h5,
   .what-content-flex {
@@ -379,6 +419,9 @@
     place-items: inherit;
     align-items: start;
     justify-content: left;
+  }
+  .what-box-title {
+    max-width: calc(100% - 25px);
   }
   .what-box {
     max-width: calc(100% - 25px);

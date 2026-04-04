@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { DRACOLoader, GLTF, GLTFLoader } from "three-stdlib";
-import { setCharTimeline, setAllTimeline } from "../../utils/GsapScroll";
 
 const setCharacter = (
   renderer: THREE.WebGLRenderer,
@@ -12,18 +11,15 @@ const setCharacter = (
   dracoLoader.setDecoderPath("/draco/");
   loader.setDRACOLoader(dracoLoader);
 
-  const loadCharacter = () => {
+  const loadModel = (blobUrl: string) => {
     return new Promise<GLTF | null>(async (resolve, reject) => {
       try {
-        const blobUrl = "/models/model.glb";
-
-        let character: THREE.Object3D;
         loader.load(
           blobUrl,
           async (gltf) => {
-            character = gltf.scene;
-            await renderer.compileAsync(character, camera, scene);
-            character.traverse((child: any) => {
+            const model = gltf.scene;
+            await renderer.compileAsync(model, camera, scene);
+            model.traverse((child: any) => {
               if (child.isMesh) {
                 const mesh = child as THREE.Mesh;
                 child.castShadow = true;
@@ -31,30 +27,7 @@ const setCharacter = (
                 mesh.frustumCulled = true;
               }
             });
-
-            // Adjust scale and position for Avaturn model
-            const box = new THREE.Box3().setFromObject(character);
-            const size = box.getSize(new THREE.Vector3());
-
-            // Scale up large so only head/shoulders (headshot) is visible
-            const targetHeight = 13;
-            const scale = targetHeight / size.y;
-            character.scale.setScalar(scale);
-
-            // Recompute bounding box after scaling
-            const newBox = new THREE.Box3().setFromObject(character);
-            const newCenter = newBox.getCenter(new THREE.Vector3());
-
-            // Position: center horizontally, push model down so face is at camera level (y=13.1)
-            character.position.x = -newCenter.x;
-            character.position.y = 2.0 - newBox.min.y;
-            character.position.z = -newCenter.z;
-
             resolve(gltf);
-            setCharTimeline(character, camera);
-            setAllTimeline();
-
-            dracoLoader.dispose();
           },
           undefined,
           (error) => {
@@ -69,7 +42,81 @@ const setCharacter = (
     });
   };
 
-  return { loadCharacter };
+  const loadCharacter = () => {
+    return new Promise<GLTF | null>(async (resolve, reject) => {
+      try {
+        const gltf = await loadModel("/models/model.glb");
+
+        if (!gltf) {
+          resolve(null);
+          return;
+        }
+
+        const character = gltf.scene;
+        const box = new THREE.Box3().setFromObject(character);
+        const size = box.getSize(new THREE.Vector3());
+
+        const targetHeight = 13;
+        const scale = targetHeight / size.y;
+        character.scale.setScalar(scale);
+
+        const newBox = new THREE.Box3().setFromObject(character);
+        const newCenter = newBox.getCenter(new THREE.Vector3());
+
+        character.position.x = -newCenter.x;
+        character.position.y = 2.0 - newBox.min.y;
+        character.position.z = -newCenter.z;
+
+        resolve(gltf);
+      } catch (err) {
+        reject(err);
+        console.error(err);
+      }
+    });
+  };
+
+  const loadWhiteboard = () => {
+    return new Promise<GLTF | null>(async (resolve, reject) => {
+      try {
+        const gltf = await loadModel("/models/whiteboard.glb");
+
+        if (!gltf) {
+          resolve(null);
+          return;
+        }
+
+        const whiteboard = gltf.scene;
+        const box = new THREE.Box3().setFromObject(whiteboard);
+        const size = box.getSize(new THREE.Vector3());
+        const targetHeight = 7.5;
+        const scale = targetHeight / size.y;
+        whiteboard.scale.setScalar(scale);
+
+        const newBox = new THREE.Box3().setFromObject(whiteboard);
+        const newCenter = newBox.getCenter(new THREE.Vector3());
+
+        whiteboard.position.x = 9.2 - newCenter.x;
+        whiteboard.position.y = 7.4 - newBox.min.y;
+        whiteboard.position.z = -1.6 - newCenter.z;
+        whiteboard.rotation.y = -1.57;
+        whiteboard.userData.presentationPose = {
+          x: whiteboard.position.x,
+          y: whiteboard.position.y,
+          z: whiteboard.position.z,
+          scale,
+          rotationY: whiteboard.rotation.y,
+        };
+        whiteboard.visible = false;
+
+        resolve(gltf);
+      } catch (err) {
+        reject(err);
+        console.error(err);
+      }
+    });
+  };
+
+  return { loadCharacter, loadWhiteboard };
 };
 
 export default setCharacter;
