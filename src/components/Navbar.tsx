@@ -23,6 +23,19 @@ const Navbar = () => {
     smoother.scrollTop(0);
     smoother.paused(true);
 
+    const MAX_DELTA = 90;
+    document.addEventListener(
+      "wheel",
+      (e) => {
+        if (Math.abs(e.deltaY) > MAX_DELTA) {
+          e.preventDefault();
+          const clampedDelta = Math.sign(e.deltaY) * MAX_DELTA;
+          window.scrollBy(0, clampedDelta);
+        }
+      },
+      { passive: false, capture: true }
+    );
+
     let links = document.querySelectorAll(".header ul a");
     links.forEach((elem) => {
       let element = elem as HTMLAnchorElement;
