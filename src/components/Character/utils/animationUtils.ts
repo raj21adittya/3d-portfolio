@@ -21,10 +21,19 @@ const setAnimations = (gltf: GLTF) => {
       introAction.clampWhenFinished = true;
       introAction.play();
     } else {
-      // Play the first available animation as idle
+      // Play the first available animation as idle, excluding Head and Neck
+      // so that manual cursor-tracking rotation is not overwritten each frame
       const defaultClip = gltf.animations[0];
-      console.log("Playing default animation:", defaultClip.name);
-      const defaultAction = mixer.clipAction(defaultClip);
+      const headExcludedBones = ["Head", "Neck"];
+      const filteredTracks = defaultClip.tracks.filter(
+        (track) => !headExcludedBones.some((bone) => track.name.includes(bone))
+      );
+      const filteredClip = new THREE.AnimationClip(
+        defaultClip.name + "_noHead",
+        defaultClip.duration,
+        filteredTracks
+      );
+      const defaultAction = mixer.clipAction(filteredClip);
       defaultAction.play();
     }
 
