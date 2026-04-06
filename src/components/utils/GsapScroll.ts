@@ -45,7 +45,6 @@ export function setCharTimeline(
     },
   });
 
-  let neckBone = character?.getObjectByName("spine005") || character?.getObjectByName("Head") || character?.getObjectByName("Neck");
   if (window.innerWidth > 1024) {
     if (character) {
       if (whiteboard) {
@@ -101,9 +100,6 @@ export function setCharTimeline(
           0
         )
         .to(character.rotation, { y: 0.92, x: 0.12, delay: 3, duration: 3 }, 0);
-      if (neckBone) {
-        tl2.to(neckBone.rotation, { x: 0.6, delay: 2, duration: 3 }, 0);
-      }
 
       tl2
         .fromTo(
